@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openworld-vision"
+version = "1.0.0"
+description = "Zero-shot open-world object discovery with Grounding DINO, SAM, CLIP, and BoT-SORT."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "fastapi==0.163.1",
+  "uvicorn[standard]>=0.34,<1",
+  "python-multipart>=0.0.20,<1",
+  "pydantic-settings>=2.7,<3",
+  "transformers==5.23.0",
+  "torch>=2.10,<2.16",
+  "accelerate>=1.2,<2",
+  "safetensors>=0.5,<1",
+  "pillow>=10.4,<13",
+  "numpy>=1.26,<3",
+  "opencv-python-headless>=4.10,<5",
+  "scipy>=1.13,<2",
+  "imageio-ffmpeg>=0.6,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3,<10",
+  "ruff>=0.8,<1",
+  "httpx>=0.28,<1",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#07111f" />
+  <title>OpenWorld Vision</title>
+  <meta name="description" content="Describe any visual target in natural language, then discover, segment, and track it with open-vocabulary vision models." />
+  <link rel="stylesheet" href="/static/styles.css?v=11" />
+</head>
+<body>
+  <div class="aurora aurora-a"></div>
+  <div class="aurora aurora-b"></div>
+
+  <header class="topbar shell">
+    <a class="brand" href="/" aria-label="OpenWorld Vision home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" role="img">
+          <path d="M6 9.5 16 4l10 5.5v13L16 28 6 22.5v-13Z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <circle cx="16" cy="16" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M4.5 16h5m13 0h5M16 2.8v5m0 16.4v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span>
+        <strong>OpenWorld</strong>
+        <span>Vision</span>
+      </span>
+    </a>
+    <div class="topbar-actions">
+      <div class="status-pill" id="apiStatus">
+        <span class="status-dot"></span>
+        <span>Connecting</span>
+      </div>
+      <a class="ghost-button" href="/docs" target="_blank" rel="noreferrer">API</a>
+    </div>
+  </header>
+
+  <main class="shell page">
+    <section class="hero-slim">
+      <h1>OpenWorld <span>Vision</span></h1>
+      <p>Describe a target. Detect, segment, and track it — no fixed class list.</p>
+    </section>
+
+    <section class="workspace">
+      <aside class="panel controls-panel">
+        <div class="section-header compact">
+          <div>
+            <div class="section-kicker">INPUT</div>
+            <h2>Choose media</h2>
+          </div>
+          <div class="segmented" role="tablist" aria-label="Media type">
+            <button class="mode-btn active" data-mode="image" role="tab" aria-selected="true">Image</button>
+            <button class="mode-btn" data-mode="video" role="tab" aria-selected="false">Video</button>
+          </div>
+        </div>
+
+        <input id="fileInput" type="file" accept="image/*,video/*,.png,.jpg,.jpeg,.webp,.gif,.bmp,.mp4,.mov,.avi,.mkv,.webm,.m4v" hidden />
+        <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Choose media file">
+          <div class="drop-placeholder" id="dropPlaceholder">
+            <div class="drop-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <strong id="dropTitle">Drop an image here</strong>
+            <span id="dropSubtitle">or click to browse PNG, JPG, WEBP</span>
+          </div>
+          <div class="media-preview hidden" id="mediaPreview">
+            <img id="previewImage" class="preview-media hidden" alt="Selected image preview" />
+            <video id="previewVideo" class="preview-media hidden" muted playsinline controls></video>
+            <div class="preview-meta">
+              <span class="file-chip" id="fileChip"></span>
+              <button type="button" class="preview-clear" id="clearFile" title="Clear selection">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-heading">
+            <label for="promptInput">Find</label>
+            <span>one target / line</span>
+          </div>
+          <textarea id="promptInput" rows="4" placeholder="person&#10;bus&#10;car&#10;banner"></textarea>
+          <div class="prompt-presets" aria-label="Prompt examples">
+            <button type="button" data-prompt="person">person</button>
+            <button type="button" data-prompt="car">car</button>
+            <button type="button" data-prompt="backpack">backpack</button>
+          </div>
+        </div>
+
+        <button class="primary-button" id="analyzeButton" type="button">
+          <span class="button-icon">✦</span>
+          <span id="analyzeButtonText">Discover</span>
+        </button>
+        <div class="secondary-actions">
+          <button class="stop-button" id="stopButton" type="button" disabled>Stop</button>
+          <button class="clear-button" id="clearButton" type="button">Clear all</button>
+        </div>
+
+        <div class="settings-block">
+          <button class="settings-toggle" id="settingsToggle" aria-expanded="false" type="button">
+            <span>Settings</span>
+            <span class="chevron">⌄</span>
+          </button>
+          <div class="settings-grid collapsed" id="settingsGrid">
+            <label class="range-field">
+              <span><b>Detection</b><output id="boxThresholdValue">0.35</output></span>
+              <input id="boxThreshold" type="range" min="0.10" max="0.80" step="0.05" value="0.35" />
+            </label>
+            <label class="range-field">
+              <span><b>Text</b><output id="textThresholdValue">0.25</output></span>
+              <input id="textThreshold" type="range" min="0.10" max="0.80" step="0.05" value="0.25" />
+            </label>
+            <label class="range-field">
+              <span><b>Max objects</b><output id="maxObjectsValue">12</output></span>
+              <input id="maxObjects" type="range" min="1" max="20" step="1" value="12" />
+            </label>
+            <label class="range-field video-only hidden" id="videoFpsField">
+              <span><b>Process FPS</b><output id="processFpsValue">4</output></span>
+              <input id="processFps" type="range" min="1" max="8" step="1" value="4" />
+            </label>
+          </div>
+        </div>
+        <p class="hint" id="limitHint">GPU recommended. First run downloads weights.</p>
+      </aside>
+
+      <section class="panel results-panel">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">RESULT</div>
+            <h2>Discovery canvas</h2>
+          </div>
+          <button id="downloadButton" class="ghost-button hidden" type="button">Download Result</button>
+        </div>
+
+        <div class="media-stage" id="mediaStage">
+          <div class="empty-state" id="emptyState">
+            <div class="radar-orb">
+              <div class="radar-ring ring-a"></div>
+              <div class="radar-ring ring-b"></div>
+              <div class="radar-sweep"></div>
+              <div class="radar-center"></div>
+            </div>
+            <h3>Ready</h3>
+            <p>Upload media and describe a target.</p>
+          </div>
+          <img id="resultImage" class="result-media hidden" alt="Annotated detection result" />
+          <video id="resultVideo" class="result-media hidden" controls playsinline></video>
+          <div class="loading-overlay hidden" id="loadingOverlay">
+            <div class="loader"></div>
+            <strong id="loadingTitle">Running inference</strong>
+            <span id="loadingText">Detection → segmentation → matching</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel stats-panel">
+        <div class="section-header compact">
+          <div>
+            <div class="section-kicker">STATS</div>
+            <h2>Run insights</h2>
+          </div>
+          <button class="text-button" id="jsonToggle" type="button">JSON</button>
+        </div>
+
+        <div class="metrics-grid" id="metricsGrid">
+          <article class="metric-card accent">
+            <span>Objects</span>
+            <strong id="metricObjects">—</strong>
+          </article>
+          <article class="metric-card">
+            <span>Mode</span>
+            <strong id="metricMode">—</strong>
+          </article>
+          <article class="metric-card">
+            <span>Compute</span>
+            <strong id="metricDevice">—</strong>
+          </article>
+          <article class="metric-card">
+            <span>Time</span>
+            <strong id="metricTime">—</strong>
+          </article>
+          <article class="metric-card">
+            <span>Avg conf</span>
+            <strong id="metricAvgConf">—</strong>
+          </article>
+          <article class="metric-card">
+            <span>Best semantic</span>
+            <strong id="metricSemantic">—</strong>
+          </article>
+          <article class="metric-card video-stat">
+            <span>Frames</span>
+            <strong id="metricFrames">—</strong>
+          </article>
+          <article class="metric-card video-stat">
+            <span>Duration</span>
+            <strong id="metricDuration">—</strong>
+          </article>
+          <article class="metric-card video-stat">
+            <span>Track FPS</span>
+            <strong id="metricTrackFps">—</strong>
+          </article>
+          <article class="metric-card">
+            <span>Throughput</span>
+            <strong id="metricThroughput">—</strong>
+          </article>
+        </div>
+
+        <div class="stat-bars" id="statBars">
+          <div class="stat-bar">
+            <div class="stat-bar-label"><span>Confidence</span><span id="barConfLabel">—</span></div>
+            <div class="stat-bar-track"><i id="barConf" style="width:0%"></i></div>
+          </div>
+          <div class="stat-bar">
+            <div class="stat-bar-label"><span>Semantic match</span><span id="barSemLabel">—</span></div>
+            <div class="stat-bar-track"><i id="barSem" style="width:0%"></i></div>
+          </div>
+        </div>
+
+        <div class="objects-section">
+          <div class="objects-header">
+            <h3 id="objectsTitle">Detected objects</h3>
+          </div>
+          <div class="object-list" id="objectList">
+            <div class="list-placeholder">Results appear here.</div>
+          </div>
+          <pre class="json-view hidden" id="jsonView"></pre>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="toast hidden" id="toast" role="alert"></div>
+  <script src="/static/app.js?v=10" defer></script>
+</body>
+</html>

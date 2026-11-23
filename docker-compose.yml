@@ -1,0 +1,14 @@
+services:
+  openworld-vision:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      OPENWORLD_DEVICE: auto
+    volumes:
+      - ./results:/app/results
+      - hf-cache:/models/huggingface
+    gpus: all
+
+volumes:
+  hf-cache:
