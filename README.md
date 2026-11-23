@@ -182,3 +182,11 @@ Tests cover prompt parsing, association math, and mask polygons. They do not dow
 - Video is sampled, not real-time.
 - The API has no auth and does not delete old files in `results/`.
 - Model cards have their own licenses. This repo is MIT.
+
+---
+
+## 👤 Author
+
+**Noman Raza Shah** — [GitHub @NomanShahRaza](https://github.com/NomanShahRaza)
+
+If you find this project useful, please consider giving it a ⭐!
